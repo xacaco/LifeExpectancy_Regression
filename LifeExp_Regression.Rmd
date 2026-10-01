@@ -1,0 +1,494 @@
+---
+title: "regression_lifexp"
+output: html_document
+date: "2023-12-04"
+---
+```{r}
+Life_Expectancy_Data_2_ <- read.csv("Life Expectancy Data (2).csv")
+```
+
+####DATAFRAME per YEARS 2004,2009,2014
+
+```{r}
+
+library(dplyr)
+
+# Filter the data for each country and the specified years (1005,2010,2015)
+filtered_data <- Life_Expectancy_Data_2_ %>%
+  filter(Year %in% c(2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015)) %>%
+  arrange(Country, Year)
+
+# Print the filtered data
+print(filtered_data)
+
+```
+
+####DATA FRAME PER CONTINENTS
+
+```{r}
+# Define countries by continent
+africa_countries <- c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde", 
+                      "Cameroon", "Central African Republic", "Chad", "Comoros", "Congo", "Côte d'Ivoire", 
+                      "Democratic Republic of the Congo", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", 
+                      "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Kenya", 
+                      "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", 
+                      "Morocco", "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", 
+                      "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", 
+                      "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe")
+
+asia_countries <- c("Afghanistan", "Armenia", "Azerbaijan", "Bahrain", "Bangladesh", "Bhutan", 
+                    "Brunei Darussalam", "Cambodia", "China", "Georgia", "India", "Indonesia", 
+                    "Iran (Islamic Republic of)", "Iraq", "Israel", "Japan", "Jordan", "Kazakhstan", 
+                    "Kuwait", "Kyrgyzstan", "Lao People's Democratic Republic", "Lebanon", "Malaysia", 
+                    "Maldives", "Mongolia", "Myanmar", "Nepal", "Oman", "Pakistan", "Palestine", 
+                    "Philippines", "Qatar", "Republic of Korea", "Saudi Arabia", "Singapore", 
+                    "Sri Lanka", "Syrian Arab Republic", "Tajikistan", "Thailand", "Timor-Leste", 
+                    "Turkey", "Turkmenistan", "United Arab Emirates", "Uzbekistan", "Viet Nam", "Yemen")
+
+europe_countries <- c("Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", 
+                      "Bulgaria", "Croatia", "Cyprus", "Czechia", "Denmark", "Estonia", "Finland", 
+                      "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Latvia", 
+                      "Lithuania", "Luxembourg", "Malta", "Moldova", "Montenegro", "Netherlands", 
+                      "North Macedonia", "Norway", "Poland", "Portugal", "Romania", "Russian Federation", 
+                      "Serbia", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", 
+                      "The former Yugoslav Republic of Macedonia", "Ukraine", 
+                      "United Kingdom of Great Britain and Northern Ireland")
+
+north_america_countries <- c("Antigua and Barbuda", "Bahamas", "Barbados", "Belize", "Canada", "Costa Rica", 
+                            "Cuba", "Dominica", "Dominican Republic", "El Salvador", "Grenada", "Guatemala", 
+                            "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", 
+                            "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", 
+                            "Trinidad and Tobago", "United States of America")
+
+oceania_countries <- c("Australia", "Fiji", "Kiribati", "Papua New Guinea", "Samoa", 
+                      "Solomon Islands", "Tonga", "Vanuatu")
+
+south_america_countries <- c("Argentina", "Bolivia (Plurinational State of)", "Brazil", "Chile", 
+                            "Colombia", "Ecuador", "Guyana", "Paraguay", "Peru", "Suriname", 
+                            "Uruguay", "Venezuela (Bolivarian Republic of)")
+
+# Create data frames for each continent
+africa_df <- data.frame(Country = africa_countries, Continent = "Africa")
+asia_df <- data.frame(Country = asia_countries, Continent = "Asia")
+europe_df <- data.frame(Country = europe_countries, Continent = "Europe")
+north_america_df <- data.frame(Country = north_america_countries, Continent = "North America")
+oceania_df <- data.frame(Country = oceania_countries, Continent = "Oceania")
+south_america_df <- data.frame(Country = south_america_countries, Continent = "South America")
+
+# Combine data frames into a single data frame
+continents <- rbind(africa_df, asia_df, europe_df, north_america_df, oceania_df, south_america_df)
+print(continents)
+```
+
+##### bind data frame together
+
+```{r}
+#Assuming "Country" column is common in both dataframes
+
+# Bind country_df with filtered_data
+merged_data <- merge(continents, filtered_data, by = "Country", all.x = TRUE)
+
+
+
+# Filter the merged data for specified years
+filtered_merged_data <- merged_data %>%
+  filter(Year %in% c(2009)) %>%
+  arrange(Country, Year)
+
+# Print the filtered and merged data
+print(filtered_merged_data)
+
+```
+### DATA FRAME FINAL
+
+```{r}
+#DATA FRAME WE ARE USING
+project_df <- with(filtered_merged_data, data.frame(
+  Country,
+  Continent,
+  Status,
+  Alcohol,
+  Total.expenditure,
+  HIV.AIDS,
+  Population,
+  Income.composition.of.resources,
+  GDP,
+  Schooling,
+  infant.deaths,
+  Life.expectancy
+))
+```
+
+### TABLE
+
+```{r}
+# Install and load the necessary packages
+if(!require(summarytools)) {install.packages('summarytools')
+library(summarytools)}
+library(dplyr)
+
+# Assuming 'project_df' is your data frame
+summary_table <- project_df %>%
+  summarytools::descr(
+    statistics = c("mean", "mode", "Q1", "median", "Q3", "range", "sd", "p10", "p90")
+  )
+
+# Print the summary table
+print(summary_table)
+
+# Install and load required packages if not already installed
+if (!requireNamespace("knitr", quietly = TRUE)) {
+  install.packages("knitr")
+}
+if (!requireNamespace("kableExtra", quietly = TRUE)) {
+  install.packages("kableExtra")
+}
+
+# Load the packages
+library(knitr)
+library(kableExtra)
+
+# Create an HTML table using kable
+table_html <- kable(summary_table, format = "html") %>%
+  kable_styling()
+
+# Print or save the HTML table
+print(table_html)
+# To save the HTML table to a file, use the following line instead
+# save_kable(table_html, "path/to/save/table.html")
+```
+
+
+### PLOTS
+
+
+```{r}
+# You might also want to use histograms for each variable
+par(mfrow=c(2,5)) # 2x2 layout for histograms
+hist(project_df$Alcohol, main = "Histogram of Alcohol")
+hist(project_df$HIV.AIDS, main = "Histogram of HIV.AIDS")
+hist(project_df$Total.expenditure, main = "Histogram of Total expenditure")
+hist(project_df$Population, main = "Histogram of Population")
+hist(project_df$Income.composition.of.resources, main = "Histogram of Income composition of resources")
+hist(project_df$GDP, main = "Histogram of GDP")
+hist(project_df$Schooling, main = "Histogram of Schooling")
+hist(project_df$infant.deaths, main = "Histogram of Infant deaths")
+hist(project_df$Life.expectancy, main = "Histogram of Life expectancy")
+# Add more histograms as needed
+
+
+boxexpectancy<-boxplot(Life.expectancy~Continent,data=project_df, main="Life expectancy depending on continent", col=c("red","orange","blue","pink","green","yellow"))
+boxexpectancy
+
+with(project_df,hist(Life.expectancy,main='Life expectancy',col='orange'))
+
+```
+
+###FULL MODEL
+
+```{r}
+project_df$ICR <- project_df$Income.composition.of.resources
+# Create the full model
+full_model <- lm(Life.expectancy ~HIV.AIDS+Status+Alcohol+Total.expenditure+Population+ICR+GDP+Schooling+infant.deaths, data =na.omit(project_df))
+fumfull<-summary(full_model)
+fumfull$sigma
+residuals1 <- residuals(full_model)
+sum(residuals1^2)
+
+residuals2 <- residuals(xbestmod)
+sum(residuals2^2)
+
+#Effects plot
+library(effects)
+plot(allEffects(full_model))
+
+
+#sign_model<-lm(Life.expectancy~.-Country-Continent-Total.expenditure-Population-GDP-infant.deaths,data =na.omit(project_df))
+#summary(sign_model)
+
+```
+### NON-LINEAR TERMS
+
+```{r}
+mod.poly.exp <- lm(Life.expectancy~poly(HIV.AIDS,2,raw=FALSE)+ Status+Alcohol+Total.expenditure+Population+ICR+GDP+Schooling+infant.deaths, data =na.omit(project_df))
+nullmodel<-lm(Life.expectancy~1, data=na.omit(project_df))
+summary(nullmodel)
+summary(mod.poly.exp)
+
+###Plot the polynomial term
+hiv_effects <- Effect("HIV.AIDS", mod.poly.exp)
+plot(hiv_effects,rug=TRUE)
+
+anova(nullmodel,full_model,mod.poly.exp,fullinteraction)
+anova(nullmodel,full_model,interac.model,fullinteraction)
+```
+### INTERACTION TERMS
+
+```{r}
+# Add interaction term between Alcohol and Income.composition.of.resources
+fullinteraction <- lm(Life.expectancy ~ Status + Alcohol + poly(HIV.AIDS, 2) + Total.expenditure + Population + GDP + Schooling + infant.deaths + Alcohol*ICR, data = na.omit(project_df))
+
+#This model has just the interaction
+interac.model<-lm(Life.expectancy ~ Status +HIV.AIDS + Total.expenditure + Population + GDP + Schooling + infant.deaths + Alcohol*ICR, data = na.omit(project_df))
+summary(interac.model)
+
+#F test show the model with ONLY the polynomial is the fittest one
+anova(mod.poly.exp,fullinteraction)
+
+###Plot the interaction term
+interac_effects <- allEffects(interac.model)
+plot(interac_effects$`Alcohol:ICR`, rug = TRUE)
+```
+
+### IS THE POLYNOMIAL OR INTERACTION MODEL THE BEST?
+
+```{r}
+#We can't use ANOVA because the model is non-nested
+AIC_mod_poly_exp <- AIC(mod.poly.exp)
+AIC_fullinteraction <- AIC(xbestmod)
+
+cat("AIC for mod.poly.exp:", AIC_mod_poly_exp, "\n")
+cat("AIC for interaction:", AIC_fullinteraction,"\n")
+
+a<-round(summary(mod.poly.exp)$adj.r.squared,6)
+aa<-round(summary(xbestmod)$adj.r.squared,6)
+a-aa
+
+#THE LOWEST AIC IS FOR MOD POLY EXP SO THIS SHOULD BE THE FITTEST ONE
+```
+
+
+### STEPWISE
+
+```{r}
+if(!require(leaps)) install.packages('leaps')
+library(leaps)
+
+regsub.full <- regsubsets(Life.expectancy~poly(HIV.AIDS,2,raw=FALSE)+ factor(Status)+Alcohol+Total.expenditure+Population+Income.composition.of.resources+GDP+Schooling+infant.deaths, data =na.omit(project_df),nbest=1,nvmax=18)
+mysum <- summary(regsub.full)
+
+plot(regsub.full,scale='adjr2') # Or Cp, bic
+plot(regsub.full,scale='Cp')
+plot(regsub.full,scale='bic')
+
+plot(mysum$adjr2,type='l',xlab='Complexity',main='Adj-R2')
+points(mysum$adjr2,pch=16)
+abline(v=which.max(mysum$adjr2),col='red',lty=2)
+text(x=5.5, y=0.69,labels = paste('Max at k =',which.max(mysum$adjr2),' predictors',sep=''),col='red')
+
+plot(mysum$bic,type='l',xlab='Complexity',main='bic')
+points(mysum$bic,pch=16)
+abline(v=which.min(mysum$bic),col='red',lty=2)
+text(x=8, y=-120,labels = paste('Min at k =',which.min(mysum$bic),' predictors',sep=''),col='red')
+
+plot(mysum$cp,type='l',,xlab='Complexity',main='Mallows Cp')
+points(mysum$cp,pch=16)
+abline(v=which.min(mysum$cp),col='red',lty=2)
+text(x=12, y=20,labels = paste('Min at k =',which.min(mysum$cp),' predictors',sep=''),col='red')
+
+
+# Stepwise backward BIC to reduce number of predictors (parsimony)
+stepwise_model <- step(mod.poly.exp, direction = "backward",criterion="BIC")
+stepwise_model
+xbestmod<-lm(formula = Life.expectancy ~ poly(HIV.AIDS, 2, raw = FALSE) + 
+    factor(Status) + Alcohol + Income.composition.of.resources + Schooling, 
+    data = na.omit(project_df))
+
+# Summary of the stepwise model
+sumfinale<-summary(stepwise_model)
+
+#R2
+cat("Adjusted R squared=",sumfinale$adj.r.squared*100,"%")
+
+#CV
+cat("\nCoefficient of variation (CV)=",sumfinale$sigma/mean(project_df$Life.expectancy)*100,"%")
+```
+### MULTICOLLINEARTITY
+
+```{r}
+vif_values <- car::vif(xbestmod)
+
+# Print VIF values
+print(vif_values)
+```
+### LINEARITY
+
+```{r}
+library(car)
+library(effects)
+
+par(mfrow=c(1,2))
+plot(xbestmod,which = c(1,3))
+
+library(lmtest)
+resettest(xbestmod, type="regressor",data =na.omit(project_df))
+
+# Component residuals plots for main effects
+
+crPlots(xbestmod, smooth=list(span=0.5))
+
+#THE MODEL IS NOT LINEAR
+```
+
+### NORMALITY
+
+```{r}
+par(mfrow=c(1,2))
+hist(xbestmod$residuals)
+plot(xbestmod,which = 2)
+
+shapiro.test(xbestmod$residuals)
+
+ks.test(residuals(xbestmod),'pnorm',mean=0,sd=summary(xbestmod)$sigma)
+
+#THE RESIDUALS DISTRIBUTION IS NORMAL
+```
+
+###HOMOGENEITY OF VARIANCES
+
+```{r}
+par(mfrow=c(1,2))
+plot(xbestmod,which=c(1,3))
+##NULL= VARIANCE FOR THE RESIDUALS IS COSTANT = we reject = heterogeneity = non costant 
+## if p value is bigger = cannot reject = error is costant = homogeneity 
+
+bptest(Life.expectancy ~ poly(HIV.AIDS, 2, raw = FALSE) + 
+    factor(Status) + Alcohol + Income.composition.of.resources + Schooling, 
+    data = project_df)
+
+bptest(log(Life.expectancy) ~ poly(HIV.AIDS, 2, raw = FALSE) + 
+    factor(Status) + Alcohol + Income.composition.of.resources + Schooling, 
+    data = project_df)
+
+#REJECT THE NULL= HETEROSCEDASTICITY 
+```
+
+###INDEPENDENCE
+
+```{r}
+acf(xbestmod$residuals,lag=100)
+
+set.seed(123)  # Fixing random seed for Bootstrapping in DW test
+durbinWatsonTest(xbestmod,max.lag=100)
+```
+
+###OUTLIERS
+
+```{r}
+#RESPONSE
+
+influenceIndexPlot(xbestmod, id=list(method="y", n=3), vars=c("Studentized"))
+# Extractor function: rstudent(); rstandard()
+
+sum(abs(rstudent(xbestmod)>3))
+
+#PREDICTORS
+influenceIndexPlot(xbestmod, id=list(method="y", n=3), vars=c("hat"))
+####3*(k+1)/n = extreme
+sum(hatvalues(xbestmod)>2*(6+1)/nrow(project_df)) #moderate
+sum(hatvalues(xbestmod)>3*(6+1)/nrow(project_df)) #extreme
+
+#INFLUENCE
+influenceIndexPlot(xbestmod, id=list(method="y", n=3), vars=c("Cook"))
+# Extractor function: cooks.distance()
+
+influencePlot(xbestmod, id=list(method="noteworthy", n=3))
+avPlots(xbestmod, id=list(method="mahal", n=2)) ## Added-variables plot
+outlierTest(xbestmod)
+
+sum(cooks.distance(xbestmod)>(4/nrow(project_df)))
+sum((cooks.distance(xbestmod))>4/nrow(project_df))
+```
+### 10-FOLD CV
+
+```{r}
+# A necessary predict method for regsubsets
+
+predict.regsubsets <- function(object,newdata,id,...){
+      form <- as.formula(object$call[[2]])
+      mat <- model.matrix(form,newdata)   
+      coefi <- coef(object,id=id)       
+      xvars <- names(coefi)               
+      mat[,xvars]%*%coefi             
+}
+
+# Creation and assignment of individuals to folds : k= 5, 10, nrow(diabetes)
+k <- 10
+
+set.seed(123)   
+if (k != nrow(project_df)) { 
+  folds <- sample(1:k, nrow(project_df), replace = TRUE)
+} else {
+  folds <- 1:k
+  }
+cv_errors <- matrix(NA, k, 9, dimnames = list(NULL, paste(1:9)))
+
+# Estimating errors by using cross-validation
+for(j in 1:k){
+    
+    # Training data set is the whole data set minus the jth fold
+    best_fit <- regsubsets(Life.expectancy ~ .-Country-Continent-Income.composition.of.resources-HIV.AIDS_log, data = project_df[folds!=j,], nvmax=9)
+    
+    # Each size i represents number of predictors
+    for(i in 1:9){
+        
+        # Make predictions for the jth fold obtained using the "best subset" model with i predictors
+        pred <- predict.regsubsets(best_fit, project_df[folds==j,], id=i)
+        
+        # Calculate the MSE and store it
+        cv_errors[j,i] <- mean((project_df$Life.expectancy[folds==j]-pred)^2)
+    }
+}
+
+# Take the mean of all folds for each model size
+mean_cv_errors <- apply(cv_errors, 2, function(x) mean(x,na.rm=TRUE))
+
+# Find the model size with the smallest cross-validation error
+min <- which.min(mean_cv_errors)
+
+# Plot the cross-validation error for each model size, highlight the min
+
+plot(mean_cv_errors,type='l',xlab='Complexity',main=ifelse(k==nrow(project_df),'LOO Cross-Validation',paste(k,'-Fold CV',sep='')))
+points(mean_cv_errors,pch=16)
+abline(v=which.min(mean_cv_errors),col='blue',lty=2)
+text(7,max(mean_cv_errors),labels = paste('Min at k =',min,' predictors',sep=''),col='blue')
+
+# Get the best model with that number of predictors as well as the parameter estimates with the full data set
+
+reg_best <- regsubsets(Life.expectancy ~ .-Country-Continent-Income.composition.of.resources-HIV.AIDS_log, data = project_df, nvmax = min)
+coef(reg_best, min)
+windows()
+```
+### LOG
+```{r}
+normmod<-lm(formula = scale(Life.expectancy) ~ scale(poly(HIV.AIDS, 2, raw = FALSE)) + 
+    factor(Status) + scale(Alcohol) + scale(Income.composition.of.resources) + 
+    scale(Schooling), data = project_df)
+summary(normmod)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
